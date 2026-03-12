@@ -1,3 +1,9 @@
+# FOLDERS
+allure-results
+allure-report
+node_modules
+test-results
+
 # Logs
 logs
 *.log
