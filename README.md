@@ -4,18 +4,18 @@
 [![Node](https://img.shields.io/badge/Node.js-24-43853d.svg)](https://nodejs.org/en)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 
-Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 24** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.
-
+Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 24** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.\
+\
 O repositório demonstra como estruturar testes de API 100% em TypeScript, reaproveitando fixtures, utilitários, leitura de dados externos e relatórios avançados com Allure Playwright.
 
-URI do repositório: [https://github.com/reinaldorossetti/playwright-api-typescript-serverest](https://github.com/reinaldorossetti/playwright-api-typescript-serverest)
-URL do Allure Report: [allure-reports](https://reinaldorossetti.github.io/playwright-api-typescript-serverest/allure-reports/#/)
+URI do repositório: [https://github.com/reinaldorossetti/playwright-api-typescript-serverest](https://github.com/reinaldorossetti/playwright-api-typescript-serverest)\
+URL do Allure Report: [allure-reports](https://reinaldorossetti.github.io/playwright-api-typescript-serverest/allure-reports/#/)\
 Documentação complementar sobre os cenários pode ser encontrada dentro de `src/tests/features`.
 
 ### Performance dos Testes com Node 24:
 
-**Versão utilizada:** Node.js v24.11.0.
-**Execução:** suíte completa Playwright disparada via npm (6 workers).
+**Versão utilizada:** Node.js v24.11.0.\
+**Execução:** suíte completa Playwright disparada via npm (6 workers).\
 **Resultado:** 50 testes passaram em 7.1 s. Os testes em paralelo mantiveram o tempo médio por teste abaixo de 150 ms, com os cenários de carrinho/produtos (1.1 a ⁠1.5s cada) dominando o custo total.
 
 ---
@@ -42,7 +42,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 ## 🧪 Sobre o Playwright
 
-**Playwright** é um framework open-source da Microsoft. Além dos cenários de browser, o runner oficial em TypeScript expõe a API `request.newContext()` para testar HTTP/REST com o mesmo ecossistema de fixtures e `expect` nativo.
+**Playwright** é um framework open-source da Microsoft. Além dos cenários de browser, o runner oficial em TypeScript expõe a API `request.newContext()` para testar HTTP/REST com o mesmo ecossistema de fixtures e `expect` nativo.\
 
 ### ✨ Principais Características para este projeto
 
@@ -67,7 +67,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 ## 🌐 Sobre a API ServeRest
 
-[ServeRest](https://serverest.dev/) é uma API REST gratuita que simula uma loja virtual completa. Ela é o back-end ideal para demonstrar cadastros, autenticação e fluxos de carrinho.
+[ServeRest](https://serverest.dev/) é uma API REST gratuita que simula uma loja virtual completa. Ela é o back-end ideal para demonstrar cadastros, autenticação e fluxos de carrinho.\
 
 ### 🛍️ Endpoints Disponíveis
 
@@ -130,10 +130,10 @@ playwright-api-typescript-serverest/
 
 ## 🔧 Pré-requisitos
 
-- **Node.js 24** (LTS — o projeto aproveita recursos modernos do runtime como `fetch` nativo e `crypto.randomUUID()`)
-- **npm** 10+ (instalado com o Node)
-- **VS Code** com extensões Playwright/TypeScript (opcional, porém recomendado)
-- Acesso à internet para consumir a API ServeRest e instalar dependências
+- **Node.js 24** (LTS — o projeto aproveita recursos modernos do runtime como `fetch` nativo e `crypto.randomUUID()`)\
+- **npm** 10+ (instalado com o Node)\
+- **VS Code** com extensões Playwright/TypeScript (opcional, porém recomendado)\
+- Acesso à internet para consumir a API ServeRest e instalar dependências\
 - **Java** (opcional) caso deseje abrir o Allure report local usando `allure open`
 
 ### Verificar instalação
@@ -173,7 +173,7 @@ npx playwright install --with-deps
 
 ## ⚡ TypeScript - Node.js 24 no Projeto
 
-Esta seção aborda recursos modernos do **Node.js 24** (evolução direta do que passou a existir desde o Node 20) aproveitados na suíte de testes.
+Esta seção aborda recursos modernos do **Node.js 24** (evolução direta do que passou a existir desde o Node 20) aproveitados na suíte de testes.\
 
 ### 🚀 Destaques do Node.js 20+ (resumo rápido)
 
@@ -185,7 +185,7 @@ Esta seção aborda recursos modernos do **Node.js 24** (evolução direta do qu
 
 ### 1. `fetch` nativo (sem dependência extra)
 
-Node.js 24 possui o `fetch` estabilizado globalmente — não é necessário incluir `node-fetch`:
+Node.js 24 possui o `fetch` estabilizado globalmente — não é necessário incluir `node-fetch`:\
 
 ```ts
 const resp = await fetch('https://serverest.dev/login', {
@@ -199,7 +199,7 @@ console.log(body.authorization);
 
 ### 2. `crypto.randomUUID()` nativo
 
-Geração de identificadores únicos sem importações externas:
+Geração de identificadores únicos sem importações externas:\
 
 ```ts
 const uniqueEmail = `user-${crypto.randomUUID()}@test.com`;
@@ -207,7 +207,7 @@ const uniqueEmail = `user-${crypto.randomUUID()}@test.com`;
 
 ### 3. `structuredClone()` para cópia profunda
 
-Clone profundo de objetos sem `JSON.parse/JSON.stringify`:
+Clone profundo de objetos sem `JSON.parse/JSON.stringify`:\
 
 ```ts
 const payloadBase = { preco: 100, quantidade: 5 };
@@ -224,15 +224,15 @@ node --watch src/myScript.ts
 node --watch --test src/tests/**/*.spec.ts
 ```
 
-O `--watch` é uma flag nativa do Node 18+ que reinicia automaticamente o script quando detecta mudanças nos arquivos, eliminando a necessidade de ferramentas como `nodemon`.
+O `--watch` é uma flag nativa do Node 18+ que reinicia automaticamente o script quando detecta mudanças nos arquivos, eliminando a necessidade de ferramentas como `nodemon`.\
 
 ### 5. `Record<K, V>` - Tipagem de objetos dinâmicos (TypeScript)
 
-`Record<K, V>` é um **utility type do TypeScript** (desde v2.1, 2016) que cria um tipo para objetos com chaves e valores específicos. Funciona perfeitamente com Node.js 24.
+`Record<K, V>` é um **utility type do TypeScript** (desde v2.1, 2016) que cria um tipo para objetos com chaves e valores específicos. Funciona perfeitamente com Node.js 24.\
 
 #### 📖 O que é?
 
-`Record<K, V>` significa: "um objeto onde todas as chaves são do tipo `K` e todos os valores são do tipo `V`".
+`Record<K, V>` significa: "um objeto onde todas as chaves são do tipo `K` e todos os valores são do tipo `V`".\
 
 ```ts
 // Sintaxe básica
@@ -320,7 +320,7 @@ test('CT05 - Validate invalid email format', async ({ api }) => {
 
 #### ⚠️ Alternativas quando você conhece as chaves
 
-Se você sabe exatamente quais chaves existem, prefira interfaces:
+Se você sabe exatamente quais chaves existem, prefira interfaces:\
 
 ```ts
 // ❌ Muito genérico
@@ -333,17 +333,17 @@ interface LoginResponse {
 }
 ```
 
-Use `Record<K, V>` quando as chaves são **dinâmicas** ou **desconhecidas** em tempo de desenvolvimento.
+Use `Record<K, V>` quando as chaves são **dinâmicas** ou **desconhecidas** em tempo de desenvolvimento.\
 
 ### 🎯 Demonstração Completa
 
-Execute `npm run demo:node22` para rodar o arquivo [`examples/node24-features.cjs`](examples/node24-features.cjs) e acompanhar, na prática, os recursos do Node 20+ que ajudam especificamente em testes de API e medições de performance:
+Execute `npm run demo:node22` para rodar o arquivo [`examples/node24-features.cjs`](examples/node24-features.cjs) e acompanhar, na prática, os recursos do Node 20+ que ajudam especificamente em testes de API e medições de performance:\
 
 ```bash
 npm run demo:node22
 ```
 
-O script cobre as seguintes funções nativas:
+O script cobre as seguintes funções nativas:\
 
 | # | Função / API | Por que ajuda em testes |
 |---|--------------|------------------------|
@@ -354,7 +354,7 @@ O script cobre as seguintes funções nativas:
 | 5 | `Promise.withResolvers()` + `timers/promises` | Sincroniza fixtures assíncronas sem boilerplate |
 | 6 | `structuredClone` | Duplica fixtures complexas sem risco de mutação compartilhada |
 
-Todos os blocos verificam a versão do runtime e informam fallbacks quando alguém ainda estiver em Node inferior.
+Todos os blocos verificam a versão do runtime e informam fallbacks quando alguém ainda estiver em Node inferior.\
 
 **Exemplo de saída:**
 
@@ -384,7 +384,7 @@ Todos os blocos verificam a versão do runtime e informam fallbacks quando algu�
 
 #### 📚 Demonstração de Record<K, V>
 
-Para ver exemplos práticos de `Record<string, string>` em contexto de testes de API, execute:
+Para ver exemplos práticos de `Record<string, string>` em contexto de testes de API, execute:\
 
 ```bash
 npm run demo:record
@@ -392,7 +392,7 @@ npm run demo:record
 node examples/record-type-usage.ts
 ```
 
-Este script demonstra **8 casos de uso** do `Record<K, V>`: headers HTTP, validação de erros, query parameters, mapeamento de status codes, configurações, cache de tokens, comparação com interfaces e uso avançado com union types.
+Este script demonstra **8 casos de uso** do `Record<K, V>`: headers HTTP, validação de erros, query parameters, mapeamento de status codes, configurações, cache de tokens, comparação com interfaces e uso avançado com union types.\
 
 ### 💡 Boas práticas
 
@@ -404,7 +404,7 @@ Este script demonstra **8 casos de uso** do `Record<K, V>`: headers HTTP, valida
 
 ## 📦 Dependências e Versões (package.json)
 
-Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteúdo do `package.json`:
+Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteúdo do `package.json`:\
 
 | Pacote                    | Versão   | Descrição |
 |---------------------------|----------|-----------|
@@ -437,7 +437,7 @@ npx playwright install --with-deps
 
 ### 3. Configure as variáveis de ambiente
 
-Copie `.env.example` (ou utilize o `.env` fornecido) e ajuste conforme necessário:
+Copie `.env.example` (ou utilize o `.env` fornecido) e ajuste conforme necessário:\
 
 ```env
 DEFAULT_USER_PASSWORD=SenhaSegura@123
@@ -448,7 +448,7 @@ API_BASE_URL=https://serverest.dev
 
 ## ▶️ Executando os Testes
 
-Toda a configuração fica no `playwright.config.ts`.
+Toda a configuração fica no `playwright.config.ts`.\
 
 ### Executar suíte completa
 
@@ -478,7 +478,7 @@ npx playwright test src/tests/features/login/login.spec.ts --grep "CT01"
 
 ### Paralelismo
 
-O `playwright.config.ts` está com `workers: 6`. Para sobrescrever durante a execução:
+O `playwright.config.ts` está com `workers: 6`. Para sobrescrever durante a execução:\
 
 ```bash
 npx playwright test --workers=auto
@@ -487,7 +487,7 @@ npx playwright test --workers=auto
 
 ## ⚙️ Esteira CI/CD - GitHub Actions
 
-- Arquivo: `.github/workflows/playwright.yml`
+- Arquivo: `.github/workflows/playwright.yml`\
 
 ### 🔁 Quando roda
 
@@ -506,7 +506,7 @@ npx playwright test --workers=auto
 
 ### 🌐 Relatório
 
-Utilize `actions/download-artifact` para baixar o HTML ou gere localmente com `npm run allure:open` (ajuste no script conforme preferência).
+Utilize `actions/download-artifact` para baixar o HTML ou gere localmente com `npm run allure:open` (ajuste no script conforme preferência).\
 
 ---
 
@@ -652,7 +652,7 @@ test('CT01 - Full cart lifecycle for authenticated user', async ({ api }) => {
 
 ## ✅ Asserções e Validações
 
-Mantivemos o título para preservar o índice, mas agora utilizamos a API `expect` do Playwright Test para asserções fluentes e tipadas.
+Mantivemos o título para preservar o índice, mas agora utilizamos a API `expect` do Playwright Test para asserções fluentes e tipadas.\
 
 ### Importação
 
@@ -699,28 +699,28 @@ Para casos estáveis, integramos o `toMatchSnapshot` do Playwright:
 expect(body).toMatchSnapshot('users-list.json');
 ```
 
-Os snapshots ficam em `src/tests/__snapshots__` e podem ser atualizados com `npx playwright test --update-snapshots`.
+Os snapshots ficam em `src/tests/__snapshots__` e podem ser atualizados com `npx playwright test --update-snapshots`.\
 
 ---
 
 ## 🔐 Variáveis de Ambiente (.env)
 
-Utilizamos [`dotenv`](https://github.com/motdotla/dotenv) para carregar valores sensíveis como senhas padrão e URLs a partir de um arquivo `.env`, mantendo credenciais fora do código-fonte.
+Utilizamos [`dotenv`](https://github.com/motdotla/dotenv) para carregar valores sensíveis como senhas padrão e URLs a partir de um arquivo `.env`, mantendo credenciais fora do código-fonte.\
 
 ### Arquivo `.env`
 
-Crie um arquivo na raiz com o seguinte conteúdo:
+Crie um arquivo na raiz com o seguinte conteúdo:\
 
 ```env
 DEFAULT_USER_PASSWORD=SenhaSegura@123
 API_BASE_URL=https://serverest.dev
 ```
 
-O arquivo está listado no `.gitignore` e não deve ser versionado.
+O arquivo está listado no `.gitignore` e não deve ser versionado.\
 
 ### Carregamento automático
 
-`src/tests/base/env.ts` lê o `.env` logo no bootstrap:
+`src/tests/base/env.ts` lê o `.env` logo no bootstrap:\
 
 ```ts
 import { config } from 'dotenv';
@@ -736,23 +736,23 @@ const schema = z.object({
 export const env = schema.parse(process.env);
 ```
 
-Com isso, qualquer teste pode importar `env.DEFAULT_USER_PASSWORD` ou `env.apiBaseUrl` sem repetir lógica.
+Com isso, qualquer teste pode importar `env.DEFAULT_USER_PASSWORD` ou `env.apiBaseUrl` sem repetir lógica.\
 
 ### Valores padrão
 
-É possível usar fallback direto na leitura:
+É possível usar fallback direto na leitura:\
 
 ```ts
 const password = env.DEFAULT_USER_PASSWORD ?? 'SenhaFallback@123';
 ```
 
-Prefira, contudo, manter o `.env` atualizado para garantir o mesmo comportamento local e no CI (onde as variáveis podem ser injetadas como `secrets`).
+Prefira, contudo, manter o `.env` atualizado para garantir o mesmo comportamento local e no CI (onde as variáveis podem ser injetadas como `secrets`).\
 
 ---
 
 ## 🎯 Funcionalidades Nativas (Playwright API)
 
-Recursos e padrões nativos utilizados nos testes com Playwright TypeScript:
+Recursos e padrões nativos utilizados nos testes com Playwright TypeScript:\
 
 ### 1. Inicialização de um contexto isolado
 
@@ -802,11 +802,11 @@ export async function postJson<T>(api: APIRequestContext, route: string, data: u
 
 ## 📊 Relatórios
 
-Playwright e Allure trabalham juntos através do pacote `allure-playwright`, que converte automaticamente as execuções em JSON armazenados em `allure-results/`.
+Playwright e Allure trabalham juntos através do pacote `allure-playwright`, que converte automaticamente as execuções em JSON armazenados em `allure-results/`.\
 
 ### 🚀 Instalação e Configurações do Allure CLI
 
-Já incluída como dependência de desenvolvimento (`allure-commandline`). Instale os binários globalmente caso deseje rodar fora do `npx`:
+Já incluída como dependência de desenvolvimento (`allure-commandline`). Instale os binários globalmente caso deseje rodar fora do `npx`:\
 
 ```bash
 npm install -g allure-commandline
@@ -823,13 +823,13 @@ npx allure generate allure-results --clean -o allure-report
 npx allure open allure-report
 ```
 
-Scripts equivalentes foram adicionados ao `package.json` para facilitar (`npm run allure:open` e `npm run allure:open`).
+Scripts equivalentes foram adicionados ao `package.json` para facilitar (`npm run allure:open` e `npm run allure:open`).\
 
-No CI, os diretórios `allure-results` e `allure-report` são carregados como artefatos para consulta posterior.
+No CI, os diretórios `allure-results` e `allure-report` são carregados como artefatos para consulta posterior.\
 
 ### 🏷️ Allure Report — Decorators
 
-Utilizamos o helper compartilhado `setSeverityAndTags` (em `src/tests/base/allureUtils.ts`) para definir criticidade e tags de forma consistente em todos os specs, sem duplicação.
+Utilizamos o helper compartilhado `setSeverityAndTags` (em `src/tests/base/allureUtils.ts`) para definir criticidade e tags de forma consistente em todos os specs, sem duplicação.\
 
 #### Helper compartilhado
 
@@ -920,7 +920,7 @@ test('CT02 - Login inválido retorna 401', async ({ api }) => {
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Para contribuir:
+Contribuições são bem-vindas! Para contribuir:\
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
@@ -932,13 +932,13 @@ Contribuições são bem-vindas! Para contribuir:
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.\
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido para fins de estudo e prática de automação de testes de API.
+Desenvolvido para fins de estudo e prática de automação de testes de API.\
 
 ---
 
