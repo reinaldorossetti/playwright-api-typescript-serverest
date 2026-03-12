@@ -35,7 +35,7 @@ jobs:
 
       - name: Generate Allure report
         if: always() && hashFiles('allure-results/**') != ''
-        run: npm run allure
+        run: npm run allure:generate
 
       - name: Upload Allure results artifact
         if: always() && hashFiles('allure-results/**') != ''

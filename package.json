@@ -9,7 +9,8 @@
     "test:usuarios": "playwright test src/tests/features/usuarios/users.spec.ts",
     "test:produtos": "playwright test src/tests/features/produtos/products.spec.ts",
     "test:carrinhos": "playwright test src/tests/features/carrinhos/carts.spec.ts",
-    "allure": "allure generate allure-results --clean -o allure-report && allure open allure-report"
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
