@@ -20,15 +20,15 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 - [Sobre a API ServeRest](#-sobre-a-api-serverest)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Pré-requisitos](#-pré-requisitos)
-- [Python no Projeto](#-python-no-projeto)
+- [TypeScript - Node.js 22](#-typescript---nodejs-22-no-projeto)
+- [Dependências e Versões](#-dependências-e-versões-packagejson)
 - [Instalação](#-instalação)
 - [Executando os Testes](#-executando-os-testes)
 - [Exemplos de Testes](#-exemplos-de-testes)
-- [assert_that — Assertpy](#-assert_that--assertpy)
-- [Variáveis de Ambiente — python-dotenv](#-variáveis-de-ambiente--python-dotenv)
-- [Funcionalidades do Playwright](#-funcionalidades-do-playwright)
+- [Asserções e Validações](#-asserções-e-validações)
+- [Variáveis de Ambiente](#-variáveis-de-ambiente-env)
+- [Funcionalidades Nativas](#-funcionalidades-nativas-playwright-api)
 - [Relatórios](#-relatórios)
-- [Allure Report — Decorators](#-allure-report--decorators)
 - [Boas Práticas](#-boas-práticas)
 - [Recursos Adicionais](#-recursos-adicionais)
 
@@ -53,7 +53,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 1. **Stack única**: Playwright test runner cobre API, UI e WebSocket na mesma base.
 2. **DX moderna**: tipagem, ESLint integrado e suporte total ao VS Code.
-3. **Ecosistema Node 22**: aproveita `fetch` nativo, `crypto.randomUUID()`, `structuredClone()` e recursos modernos do runtime.
+3. **Ecossistema Node 22**: aproveita `fetch` nativo, `crypto.randomUUID()`, `structuredClone()` e recursos modernos do runtime.
 4. **Observabilidade**: Allure + traços Playwright facilitam troubleshooting.
 5. **CI/CD direto**: GitHub Actions roda `npx playwright test` sem configuração complexa.
 
@@ -164,7 +164,7 @@ npx playwright install --with-deps
 ```
 ---
 
-## TypeScript - Node.js 22 no Projeto
+## ⚡ TypeScript - Node.js 22 no Projeto
 
 Esta seção aborda recursos modernos do **Node.js 22** aproveitados na suíte de testes.
 
@@ -371,7 +371,7 @@ Este script demonstra **8 casos de uso** do `Record<K, V>`: headers HTTP, valida
 
 ---
 
-## 📦 Dependências e Versões (requirements.txt)
+## 📦 Dependências e Versões (package.json)
 
 Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteúdo do `package.json`:
 
@@ -620,7 +620,7 @@ test('CT01 - Full cart lifecycle for authenticated admin', async ({ api }) => {
 
 ---
 
-## ✅ assert_that — Assertpy
+## ✅ Asserções e Validações
 
 Mantivemos o título para preservar o índice, mas agora utilizamos a API `expect` do Playwright Test para asserções fluentes e tipadas.
 
@@ -673,7 +673,7 @@ Os snapshots ficam em `src/tests/__snapshots__` e podem ser atualizados com `npx
 
 ---
 
-## 🔐 Variáveis de Ambiente — python-dotenv
+## 🔐 Variáveis de Ambiente (.env)
 
 Utilizamos [`dotenv`](https://github.com/motdotla/dotenv) para carregar valores sensíveis como senhas padrão e URLs a partir de um arquivo `.env`, mantendo credenciais fora do código-fonte.
 
@@ -720,7 +720,7 @@ Prefira, contudo, manter o `.env` atualizado para garantir o mesmo comportamento
 
 ---
 
-## 🎯 Funcionalidades e Sintaxe Nativas (Playwright Python API)
+## 🎯 Funcionalidades Nativas (Playwright API)
 
 Recursos e padrões nativos utilizados nos testes com Playwright TypeScript:
 
@@ -774,7 +774,7 @@ export async function postJson<T>(api: APIRequestContext, route: string, data: u
 
 Playwright e Allure trabalham juntos através do pacote `allure-playwright`, que converte automaticamente as execuções em JSON armazenados em `allure-results/`.
 
-### Instalação do Allure CLI
+### 🚀 Instalação e Configurações do Allure CLI
 
 Já incluída como dependência de desenvolvimento (`allure-commandline`). Instale os binários globalmente caso deseje rodar fora do `npx`:
 
@@ -793,7 +793,7 @@ npx allure generate allure-results --clean -o allure-report
 npx allure open allure-report
 ```
 
-Scripts equivalentes foram adicionados ao `package.json` para facilitar (`npm run allure:report` e `npm run allure:open`).
+Scripts equivalentes foram adicionados ao `package.json` para facilitar (`npm run allure:open` e `npm run allure:open`).
 
 No CI, os diretórios `allure-results` e `allure-report` são carregados como artefatos para consulta posterior.
 

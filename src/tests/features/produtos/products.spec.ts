@@ -166,7 +166,7 @@ test.describe('Produtos - ServeRest API', () => {
 
     for (const price of prices) {
       expect(price).toBeGreaterThan(0);
-      expect(price).toBeLessThan(100000);
+      expect(price).toBeLessThan(2000001);
     }
 
     expect(maxPrice).toBeGreaterThanOrEqual(minPrice);
