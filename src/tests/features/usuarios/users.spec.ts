@@ -1,5 +1,6 @@
 import { test, expect } from '../../base/api.fixture';
-import { annotateTest } from '../../base/allure';
+import { allure } from 'allure-playwright';
+import { Severity } from 'allure-js-commons';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
@@ -7,6 +8,13 @@ import { loadJsonResource } from '../../utils/dataUtils';
 import { randomEmail, randomName } from '../../utils/fakerUtils';
 
 test.describe.configure({ mode: 'parallel' });
+
+const setSeverityAndTags = async (severity: Severity, tags: string[] = []): Promise<void> => {
+  await allure.severity(severity);
+  for (const tag of tags) {
+    await allure.tag(tag);
+  }
+};
 
 type User = {
   _id: string;
@@ -17,8 +25,8 @@ type User = {
 };
 
 test.describe('Usuários - ServeRest API', () => {
-  test('CT01 - List all users and validate JSON structure', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'listing'] });
+  test('CT01 - List all users and validate JSON structure', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'listing']);
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -36,8 +44,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT02 - Get a specific user by ID', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'details'] });
+  test('CT02 - Get a specific user by ID', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'details']);
     const listResp = await api.get('/usuarios');
     expect(listResp.status()).toBe(200);
 
@@ -53,8 +61,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.email).toBeTruthy();
   });
 
-  test('CT03 - Create a new user with complete validations', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'usuarios', 'creation'] });
+  test('CT03 - Create a new user with complete validations', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'usuarios', 'creation']);
     const email = randomEmail();
     const nome = randomName();
     const password = 'Senha123@';
@@ -82,8 +90,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.email).toBe(email);
   });
 
-  test('CT04 - Advanced JSON validations with filters', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'filters'] });
+  test('CT04 - Advanced JSON validations with filters', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'filters']);
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -97,8 +105,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT05 - Validate error messages when creating a duplicate email', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'validation'] });
+  test('CT05 - Validate error messages when creating a duplicate email', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'validation']);
     const duplicateEmail = randomEmail();
 
     const first = await api.post('/usuarios', {
@@ -125,8 +133,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(secondBody.message).toBe('Este email já está sendo usado');
   });
 
-  test('CT06 - Validate with fuzzy matching', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'filters'] });
+  test('CT06 - Validate with fuzzy matching', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'filters']);
     const resp = await api.get('/usuarios?administrador=true');
     expect(resp.status()).toBe(200);
 
@@ -140,8 +148,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT07 - Conditional validations based on values', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
+  test('CT07 - Conditional validations based on values', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'validation']);
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -153,8 +161,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.password.length).toBeGreaterThan(0);
   });
 
-  test('CT08 - Validate formats with regular expressions', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'regex'] });
+  test('CT08 - Validate formats with regular expressions', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'regex']);
     const newEmail = `test.regex.${Date.now()}@example.com`;
 
     const createResp = await api.post('/usuarios', {
@@ -178,8 +186,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user._id).toMatch(/[A-Za-z0-9]+/);
   });
 
-  test('CT09 - Validate absence of fields', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
+  test('CT09 - Validate absence of fields', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'validation']);
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -192,8 +200,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.phone).toBeUndefined();
   });
 
-  test('CT10 - Use variables for dynamic validations', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'data-driven'] });
+  test('CT10 - Use variables for dynamic validations', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'data-driven']);
     const expectedEmail = randomEmail();
     const userPayload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
@@ -215,8 +223,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(searchBody.usuarios[0].nome).toBeTruthy();
   });
 
-  test('CT11 - Prepare data for nested object validation', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
+  test('CT11 - Prepare data for nested object validation', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'validation']);
     const complexEmail = randomEmail();
 
     const resp = await api.post('/usuarios', {
@@ -236,8 +244,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body._id.length).toBeGreaterThan(10);
   });
 
-  test('CT12 - Create a user from fixed JSON file', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'data-driven'] });
+  test('CT12 - Create a user from fixed JSON file', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'data-driven']);
     const payload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
       'usuarios',
@@ -254,8 +262,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body._id).toBeTruthy();
   });
 
-  test('CT13 - Create and delete user based on JSON payload', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'lifecycle'] });
+  test('CT13 - Create and delete user based on JSON payload', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'lifecycle']);
     const expectedEmail = randomEmail();
     const payload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
@@ -281,8 +289,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(searchBody.quantidade).toBe(0);
   });
 
-  test('CT14 - Prevent deleting user that has an associated cart', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'usuarios', 'carrinhos'] });
+  test('CT14 - Prevent deleting user that has an associated cart', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'usuarios', 'carrinhos']);
     const userEmail = randomEmail();
     const userPassword = DEFAULT_USER_PASSWORD;
 
@@ -323,8 +331,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(deleteBody.idCarrinho).toBeTruthy();
   });
 
-  test('CT15 - Get user by invalid ID should return 400', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'error-handling'] });
+  test('CT15 - Get user by invalid ID should return 400', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'usuarios', 'error-handling']);
     const resp = await api.get('/usuarios/3F7K9P2XQ8M1R6TB');
     expect(resp.status()).toBe(400);
 
@@ -332,8 +340,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body.message).toBe('Usuário não encontrado');
   });
 
-  test('CT16 - Prevent updating user with duplicate e-mail', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'validation'] });
+  test('CT16 - Prevent updating user with duplicate e-mail', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'usuarios', 'validation']);
     const email1 = randomEmail();
     const email2 = randomEmail();
 

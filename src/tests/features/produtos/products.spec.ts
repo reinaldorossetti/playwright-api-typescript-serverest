@@ -1,11 +1,19 @@
 import { test, expect } from '../../base/api.fixture';
-import { annotateTest } from '../../base/allure';
+import { allure } from 'allure-playwright';
+import { Severity } from 'allure-js-commons';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createAdminAndGetToken, createProduct, createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
 import { loadJsonResource } from '../../utils/dataUtils';
 
 test.describe.configure({ mode: 'parallel' });
+
+const setSeverityAndTags = async (severity: Severity, tags: string[] = []): Promise<void> => {
+  await allure.severity(severity);
+  for (const tag of tags) {
+    await allure.tag(tag);
+  }
+};
 
 type Product = {
   _id: string;
@@ -16,8 +24,8 @@ type Product = {
 };
 
 test.describe('Produtos - ServeRest API', () => {
-  test('CT01 - List all products and validate JSON structure', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'listing'] });
+  test('CT01 - List all products and validate JSON structure', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'listing']);
     const resp = await api.get(API_ROUTES.PRODUCTS);
     expect(resp.status()).toBe(200);
 
@@ -34,8 +42,8 @@ test.describe('Produtos - ServeRest API', () => {
     }
   });
 
-  test('CT02 - Create a new product as an administrator', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'produtos', 'creation'] });
+  test('CT02 - Create a new product as an administrator', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'produtos', 'creation']);
     const token = await createAdminAndGetToken(api);
     const productName = `Product ${Date.now()}`;
 
@@ -64,8 +72,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(product.quantidade).toBe(100);
   });
 
-  test('CT03 - Validate error when creating a product with a duplicate name', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'validation'] });
+  test('CT03 - Validate error when creating a product with a duplicate name', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'validation']);
     const token = await createAdminAndGetToken(api);
     const name = `Duplicate Product Test ${Date.now()}`;
 
@@ -86,8 +94,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(secondBody.message).toBe('Já existe produto com esse nome');
   });
 
-  test('CT04 - Search for products using query parameters', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'produtos', 'filters'] });
+  test('CT04 - Search for products using query parameters', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'produtos', 'filters']);
     const resp = await api.get(`${API_ROUTES.PRODUCTS}?nome=Logitech`);
     expect(resp.status()).toBe(200);
 
@@ -102,8 +110,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(priceResp.status()).toBe(200);
   });
 
-  test('CT05 - Update information of an existing product', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'produtos', 'update'] });
+  test('CT05 - Update information of an existing product', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'produtos', 'update']);
     const token = await createAdminAndGetToken(api);
     const productName = `Product ${Date.now()}`;
 
@@ -143,8 +151,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(product.quantidade).toBe(75);
   });
 
-  test('CT06 - Validate price calculations and comparisons', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'produtos', 'analytics'] });
+  test('CT06 - Validate price calculations and comparisons', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'produtos', 'analytics']);
     const resp = await api.get(API_ROUTES.PRODUCTS);
     expect(resp.status()).toBe(200);
 
@@ -165,8 +173,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(maxPrice).toBeGreaterThanOrEqual(minPrice);
   });
 
-  test('CT07 - Attempt to create a product without an authentication token', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'auth'] });
+  test('CT07 - Attempt to create a product without an authentication token', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'auth']);
     const resp = await api.post(API_ROUTES.PRODUCTS, {
       data: {
         nome: 'Product Without Auth',
@@ -189,8 +197,8 @@ test.describe('Produtos - ServeRest API', () => {
   ];
 
   for (let i = 0; i < missingFieldPayloads.length; i++) {
-    test(`CT08 - Validate required fields when creating a product [case ${i + 1}]`, async ({ api }, testInfo) => {
-      annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'validation'] });
+    test(`CT08 - Validate required fields when creating a product [case ${i + 1}]`, async ({ api }) => {
+      await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'validation']);
       const token = await createAdminAndGetToken(api);
       const resp = await api.post(API_ROUTES.PRODUCTS, {
         headers: withAuth(token),
@@ -201,8 +209,8 @@ test.describe('Produtos - ServeRest API', () => {
     });
   }
 
-  test('CT09 - Work with complex JSON data', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'produtos', 'analytics'] });
+  test('CT09 - Work with complex JSON data', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'produtos', 'analytics']);
     const resp = await api.get(API_ROUTES.PRODUCTS);
     expect(resp.status()).toBe(200);
 
@@ -220,8 +228,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(expensiveProducts).toBeDefined();
   });
 
-  test('CT10 - Delete an existing product', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'produtos', 'deletion'] });
+  test('CT10 - Delete an existing product', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'produtos', 'deletion']);
     const token = await createAdminAndGetToken(api);
     const productId = await createProduct(api, token, {
       price: 100,
@@ -242,8 +250,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(getBody.message).toBe('Produto não encontrado');
   });
 
-  test('CT11 - Create a product from fixed JSON payload', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'data-driven'] });
+  test('CT11 - Create a product from fixed JSON payload', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'data-driven']);
     const token = await createAdminAndGetToken(api);
 
     const payload = loadJsonResource<Record<string, unknown>>(
@@ -265,8 +273,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(body._id).toBeTruthy();
   });
 
-  test('CT12 - Prevent deleting a product that is part of a cart', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'produtos', 'carrinhos'] });
+  test('CT12 - Prevent deleting a product that is part of a cart', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'produtos', 'carrinhos']);
     const adminToken = await createAdminAndGetToken(api);
 
     const createProductResp = await api.post(API_ROUTES.PRODUCTS, {
@@ -307,8 +315,8 @@ test.describe('Produtos - ServeRest API', () => {
     expect(deleteBody.message).toBe('Não é permitido excluir produto que faz parte de carrinho');
   });
 
-  test('CT13 - Restrict product creation to administrators only', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'produtos', 'authorization'] });
+  test('CT13 - Restrict product creation to administrators only', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'produtos', 'authorization']);
     const userEmail = `non.admin.${Date.now()}@example.com`;
     const userPassword = DEFAULT_USER_PASSWORD;
 

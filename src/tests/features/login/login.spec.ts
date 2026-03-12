@@ -1,5 +1,6 @@
 import { test, expect } from '../../base/api.fixture';
-import { annotateTest } from '../../base/allure';
+import { allure } from 'allure-playwright';
+import { Severity } from 'allure-js-commons';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createUser, parseResponseBody } from '../../base/apiHelpers';
@@ -8,9 +9,16 @@ import { readCsvColumn } from '../../utils/dataUtils';
 
 test.describe.configure({ mode: 'parallel' });
 
+const setSeverityAndTags = async (severity: Severity, tags: string[] = []): Promise<void> => {
+  await allure.severity(severity);
+  for (const tag of tags) {
+    await allure.tag(tag);
+  }
+};
+
 test.describe('Login - ServeRest API', () => {
-  test('CT01 - Perform login with valid credentials and validate token', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'login', 'happy-path'] });
+  test('CT01 - Perform login with valid credentials and validate token', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'login', 'happy-path']);
     const email = randomEmail();
     const password = DEFAULT_USER_PASSWORD;
 
@@ -25,8 +33,8 @@ test.describe('Login - ServeRest API', () => {
     expect(body.authorization).toBeTruthy();
   });
 
-  test('CT02 - Attempt login with invalid credentials', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'login', 'negative'] });
+  test('CT02 - Attempt login with invalid credentials', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'login', 'negative']);
     const resp = await api.post(API_ROUTES.LOGIN, {
       data: {
         email: 'usuario@inexistente.com',
@@ -41,8 +49,8 @@ test.describe('Login - ServeRest API', () => {
     expect(body.authorization).toBeUndefined();
   });
 
-  test('CT03 - Validate required fields on login', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'login', 'validation'] });
+  test('CT03 - Validate required fields on login', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'login', 'validation']);
     const resp1 = await api.post(API_ROUTES.LOGIN, { data: { email: '', password: 'senha123' } });
     expect(resp1.status()).toBe(400);
     const body1 = await parseResponseBody<Record<string, string>>(resp1);
@@ -60,8 +68,8 @@ test.describe('Login - ServeRest API', () => {
     expect(body3.password).toBeTruthy();
   });
 
-  test('CT04 - Login and use token to access a protected resource', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'login', 'authorization'] });
+  test('CT04 - Login and use token to access a protected resource', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'login', 'authorization']);
     const userEmail = randomEmail();
     const userPassword = DEFAULT_USER_PASSWORD;
 
@@ -92,8 +100,8 @@ test.describe('Login - ServeRest API', () => {
   const invalidEmails = readCsvColumn('playwright_serverest', 'login', 'invalid-login-emails.csv');
 
   for (const invalidEmail of invalidEmails) {
-    test(`CT05 - Validate invalid email format: ${invalidEmail}`, async ({ api }, testInfo) => {
-      annotateTest(testInfo, { severity: 'minor', tags: ['api', 'login', 'validation'] });
+    test(`CT05 - Validate invalid email format: ${invalidEmail}`, async ({ api }) => {
+      await setSeverityAndTags(Severity.MINOR, ['api', 'login', 'validation']);
       const resp = await api.post(API_ROUTES.LOGIN, {
         data: {
           email: invalidEmail,

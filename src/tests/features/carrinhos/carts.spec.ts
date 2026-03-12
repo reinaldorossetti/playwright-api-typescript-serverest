@@ -1,12 +1,20 @@
 import { test, expect } from '../../base/api.fixture';
 import type { APIRequestContext } from '@playwright/test';
-import { annotateTest } from '../../base/allure';
+import { allure } from 'allure-playwright';
+import { Severity } from 'allure-js-commons';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createProduct, createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
 import { randomEmail } from '../../utils/fakerUtils';
 
 test.describe.configure({ mode: 'parallel' });
+
+const setSeverityAndTags = async (severity: Severity, tags: string[] = []): Promise<void> => {
+  await allure.severity(severity);
+  for (const tag of tags) {
+    await allure.tag(tag);
+  }
+};
 
 async function loginWithDefaultPayload(api: APIRequestContext): Promise<string> {
   const userEmail = randomEmail();
@@ -25,8 +33,8 @@ async function createAdminUserAndGetToken(api: APIRequestContext): Promise<strin
 }
 
 test.describe('Carrinhos - ServeRest API', () => {
-  test('CT01 - Full cart lifecycle for authenticated user', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'carrinhos', 'lifecycle'] });
+  test('CT01 - Full cart lifecycle for authenticated user', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'carrinhos', 'lifecycle']);
     const token = await createAdminUserAndGetToken(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
@@ -71,8 +79,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(concludeBody.message).toContain('Registro excluído com sucesso');
   });
 
-  test('CT02 - Cancel purchase and return products to stock', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'carrinhos', 'stock'] });
+  test('CT02 - Cancel purchase and return products to stock', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'carrinhos', 'stock']);
     const token = await loginWithDefaultPayload(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
@@ -96,8 +104,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(cancelBody.message).toBeTruthy();
   });
 
-  test('CT03 - Prevent creating cart without authentication token', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'carrinhos', 'auth'] });
+  test('CT03 - Prevent creating cart without authentication token', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'carrinhos', 'auth']);
     const resp = await api.post(API_ROUTES.CARTS, {
       data: { produtos: [{ idProduto: 'BeeJh5lz3k6kSIzA', quantidade: 1 }] }
     });
@@ -108,8 +116,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(body.message).toBe('Token de acesso ausente, inválido, expirado ou usuário do token não existe mais');
   });
 
-  test('CT04 - Prevent creating more than one cart for the same user', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'carrinhos', 'business-rule'] });
+  test('CT04 - Prevent creating more than one cart for the same user', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'carrinhos', 'business-rule']);
     const token = await loginWithDefaultPayload(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
@@ -136,8 +144,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(secondBody.message).toContain('Não é permitido ter mais de 1 carrinho');
   });
 
-  test('CT05 - Cart not found by ID', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'carrinhos', 'error-handling'] });
+  test('CT05 - Cart not found by ID', async ({ api }) => {
+    await setSeverityAndTags(Severity.MINOR, ['api', 'carrinhos', 'error-handling']);
     const resp = await api.get(`${API_ROUTES.CARTS}/invalid-cart-id-123`);
     expect(resp.status()).toBe(400);
 
@@ -145,8 +153,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(body.id).toBe('id deve ter exatamente 16 caracteres alfanuméricos');
   });
 
-  test('CT06 - Prevent cart creation when product stock is insufficient', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'carrinhos', 'stock'] });
+  test('CT06 - Prevent cart creation when product stock is insufficient', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'carrinhos', 'stock']);
     const token = await loginWithDefaultPayload(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
@@ -167,8 +175,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(body.message).toContain('Produto não possui quantidade suficiente');
   });
 
-  test('CT07 - Prevent cart creation with duplicated products in the same cart', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'carrinhos', 'validation'] });
+  test('CT07 - Prevent cart creation with duplicated products in the same cart', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'carrinhos', 'validation']);
     const token = await loginWithDefaultPayload(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
@@ -194,8 +202,8 @@ test.describe('Carrinhos - ServeRest API', () => {
     expect(body.message).toContain('Não é permitido possuir produto duplicado');
   });
 
-  test('CT08 - Prevent cart creation with non-existing product', async ({ api }, testInfo) => {
-    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'carrinhos', 'data-integrity'] });
+  test('CT08 - Prevent cart creation with non-existing product', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'carrinhos', 'data-integrity']);
     const token = await loginWithDefaultPayload(api);
 
     await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
