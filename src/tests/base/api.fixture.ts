@@ -1,7 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
 
-export const BASE_URL = 'https://serverest.dev';
+import { env } from './env';
+
+export const BASE_URL = env.apiBaseUrl;
 
 type ApiFixtures = {
   api: APIRequestContext;

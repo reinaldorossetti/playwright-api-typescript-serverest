@@ -1,4 +1,7 @@
 import { test, expect } from '../../base/api.fixture';
+import { annotateTest } from '../../base/allure';
+import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
+import { withAuth } from '../../base/http';
 import { createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
 import { loadJsonResource } from '../../utils/dataUtils';
 import { randomEmail, randomName } from '../../utils/fakerUtils';
@@ -14,7 +17,8 @@ type User = {
 };
 
 test.describe('Usuários - ServeRest API', () => {
-  test('CT01 - List all users and validate JSON structure', async ({ api }) => {
+  test('CT01 - List all users and validate JSON structure', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'listing'] });
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -32,7 +36,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT02 - Get a specific user by ID', async ({ api }) => {
+  test('CT02 - Get a specific user by ID', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'details'] });
     const listResp = await api.get('/usuarios');
     expect(listResp.status()).toBe(200);
 
@@ -48,7 +53,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.email).toBeTruthy();
   });
 
-  test('CT03 - Create a new user with complete validations', async ({ api }) => {
+  test('CT03 - Create a new user with complete validations', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'usuarios', 'creation'] });
     const email = randomEmail();
     const nome = randomName();
     const password = 'Senha123@';
@@ -76,7 +82,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.email).toBe(email);
   });
 
-  test('CT04 - Advanced JSON validations with filters', async ({ api }) => {
+  test('CT04 - Advanced JSON validations with filters', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'filters'] });
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -90,7 +97,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT05 - Validate error messages when creating a duplicate email', async ({ api }) => {
+  test('CT05 - Validate error messages when creating a duplicate email', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'validation'] });
     const duplicateEmail = randomEmail();
 
     const first = await api.post('/usuarios', {
@@ -117,7 +125,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(secondBody.message).toBe('Este email já está sendo usado');
   });
 
-  test('CT06 - Validate with fuzzy matching', async ({ api }) => {
+  test('CT06 - Validate with fuzzy matching', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'filters'] });
     const resp = await api.get('/usuarios?administrador=true');
     expect(resp.status()).toBe(200);
 
@@ -131,7 +140,8 @@ test.describe('Usuários - ServeRest API', () => {
     }
   });
 
-  test('CT07 - Conditional validations based on values', async ({ api }) => {
+  test('CT07 - Conditional validations based on values', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -143,7 +153,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.password.length).toBeGreaterThan(0);
   });
 
-  test('CT08 - Validate formats with regular expressions', async ({ api }) => {
+  test('CT08 - Validate formats with regular expressions', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'regex'] });
     const newEmail = `test.regex.${Date.now()}@example.com`;
 
     const createResp = await api.post('/usuarios', {
@@ -167,7 +178,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user._id).toMatch(/[A-Za-z0-9]+/);
   });
 
-  test('CT09 - Validate absence of fields', async ({ api }) => {
+  test('CT09 - Validate absence of fields', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
     const resp = await api.get('/usuarios');
     expect(resp.status()).toBe(200);
 
@@ -180,7 +192,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(user.phone).toBeUndefined();
   });
 
-  test('CT10 - Use variables for dynamic validations', async ({ api }) => {
+  test('CT10 - Use variables for dynamic validations', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'data-driven'] });
     const expectedEmail = randomEmail();
     const userPayload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
@@ -202,7 +215,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(searchBody.usuarios[0].nome).toBeTruthy();
   });
 
-  test('CT11 - Prepare data for nested object validation', async ({ api }) => {
+  test('CT11 - Prepare data for nested object validation', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'validation'] });
     const complexEmail = randomEmail();
 
     const resp = await api.post('/usuarios', {
@@ -222,7 +236,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body._id.length).toBeGreaterThan(10);
   });
 
-  test('CT12 - Create a user from fixed JSON file', async ({ api }) => {
+  test('CT12 - Create a user from fixed JSON file', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'data-driven'] });
     const payload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
       'usuarios',
@@ -239,7 +254,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body._id).toBeTruthy();
   });
 
-  test('CT13 - Create and delete user based on JSON payload', async ({ api }) => {
+  test('CT13 - Create and delete user based on JSON payload', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'lifecycle'] });
     const expectedEmail = randomEmail();
     const payload = loadJsonResource<Record<string, unknown>>(
       'playwright_serverest',
@@ -265,11 +281,12 @@ test.describe('Usuários - ServeRest API', () => {
     expect(searchBody.quantidade).toBe(0);
   });
 
-  test('CT14 - Prevent deleting user that has an associated cart', async ({ api }) => {
+  test('CT14 - Prevent deleting user that has an associated cart', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'critical', tags: ['api', 'usuarios', 'carrinhos'] });
     const userEmail = randomEmail();
-    const userPassword = 'SenhaSegura@123';
+    const userPassword = DEFAULT_USER_PASSWORD;
 
-    const createUserResp = await createUser(api, userEmail, userPassword, true, 'User With Cart');
+    const createUserResp = await createUser(api, { email: userEmail, password: userPassword, admin: true, name: 'User With Cart' });
     expect(createUserResp.status()).toBe(201);
 
     const createUserBody = await parseResponseBody<{ message: string; _id: string }>(createUserResp);
@@ -277,8 +294,8 @@ test.describe('Usuários - ServeRest API', () => {
 
     const userToken = await loginAndGetToken(api, userEmail, userPassword);
 
-    const productResp = await api.post('/produtos', {
-      headers: { Authorization: userToken },
+    const productResp = await api.post(API_ROUTES.PRODUCTS, {
+      headers: withAuth(userToken),
       data: {
         nome: `Product for user cart ${Date.now()}`,
         preco: 100,
@@ -290,10 +307,10 @@ test.describe('Usuários - ServeRest API', () => {
 
     const productBody = await parseResponseBody<{ _id: string }>(productResp);
 
-    await api.delete('/carrinhos/cancelar-compra', { headers: { Authorization: userToken } });
+    await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(userToken) });
 
-    const cartResp = await api.post('/carrinhos', {
-      headers: { Authorization: userToken },
+    const cartResp = await api.post(API_ROUTES.CARTS, {
+      headers: withAuth(userToken),
       data: { produtos: [{ idProduto: productBody._id, quantidade: 1 }] }
     });
     expect(cartResp.status()).toBe(201);
@@ -306,7 +323,8 @@ test.describe('Usuários - ServeRest API', () => {
     expect(deleteBody.idCarrinho).toBeTruthy();
   });
 
-  test('CT15 - Get user by invalid ID should return 400', async ({ api }) => {
+  test('CT15 - Get user by invalid ID should return 400', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'minor', tags: ['api', 'usuarios', 'error-handling'] });
     const resp = await api.get('/usuarios/3F7K9P2XQ8M1R6TB');
     expect(resp.status()).toBe(400);
 
@@ -314,16 +332,17 @@ test.describe('Usuários - ServeRest API', () => {
     expect(body.message).toBe('Usuário não encontrado');
   });
 
-  test('CT16 - Prevent updating user with duplicate e-mail', async ({ api }) => {
+  test('CT16 - Prevent updating user with duplicate e-mail', async ({ api }, testInfo) => {
+    annotateTest(testInfo, { severity: 'normal', tags: ['api', 'usuarios', 'validation'] });
     const email1 = randomEmail();
     const email2 = randomEmail();
 
-    const createUser1Resp = await createUser(api, email1, 'Senha123@', false, 'User One');
+    const createUser1Resp = await createUser(api, { email: email1, password: 'Senha123@', name: 'User One' });
     expect(createUser1Resp.status()).toBe(201);
 
     const createUser1Body = await parseResponseBody<{ _id: string }>(createUser1Resp);
 
-    const createUser2Resp = await createUser(api, email2, 'Senha456@', true, 'User Two');
+    const createUser2Resp = await createUser(api, { email: email2, password: 'Senha456@', admin: true, name: 'User Two' });
     expect(createUser2Resp.status()).toBe(201);
 
     const updateResp = await api.put(`/usuarios/${createUser1Body._id}`, {

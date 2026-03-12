@@ -1,18 +1,21 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 
+import { API_ROUTES, DEFAULT_USER_PASSWORD } from './constants';
+import { withAuth } from './http';
 import { randomEmail, randomProduct } from '../utils/fakerUtils';
 
 export async function parseResponseBody<T = Record<string, unknown>>(response: APIResponse): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function createUser(
-  api: APIRequestContext,
-  email: string,
-  password: string,
-  admin: boolean,
-  name?: string
-): Promise<APIResponse> {
+export type CreateUserOptions = {
+  email: string;
+  password: string;
+  admin?: boolean;
+  name?: string;
+};
+
+export async function createUser(api: APIRequestContext, { email, password, admin = false, name }: CreateUserOptions): Promise<APIResponse> {
   const payload = {
     nome: name ?? email,
     email,
@@ -20,7 +23,7 @@ export async function createUser(
     administrador: admin ? 'true' : 'false'
   };
 
-  return api.post('/usuarios', { data: payload });
+  return api.post(API_ROUTES.USERS, { data: payload });
 }
 
 export async function loginAndGetToken(
@@ -28,7 +31,7 @@ export async function loginAndGetToken(
   email: string,
   password: string
 ): Promise<string> {
-  const loginResp = await api.post('/login', { data: { email, password } });
+  const loginResp = await api.post(API_ROUTES.LOGIN, { data: { email, password } });
   if (loginResp.status() !== 200) {
     throw new Error(`Login failed with status ${loginResp.status()}`);
   }
@@ -38,9 +41,9 @@ export async function loginAndGetToken(
 
 export async function createAdminAndGetToken(api: APIRequestContext): Promise<string> {
   const email = `admin.${randomEmail()}`;
-  const password = 'SenhaSegura@123';
+  const password = DEFAULT_USER_PASSWORD;
 
-  await createUser(api, email, password, true, 'Admin User');
+  await createUser(api, { email, password, admin: true, name: 'Admin User' });
   return loginAndGetToken(api, email, password);
 }
 
@@ -56,8 +59,8 @@ export async function createProduct(
     quantidade: params?.quantity ?? 10
   };
 
-  const resp = await api.post('/produtos', {
-    headers: { Authorization: token },
+  const resp = await api.post(API_ROUTES.PRODUCTS, {
+    headers: withAuth(token),
     data: payload
   });
 

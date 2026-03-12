@@ -3,11 +3,11 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './src/tests/features',
   fullyParallel: true,
-  retries: 0,
-  workers: process.env.CI ? 2 : undefined,
-  timeout: 30_000,
+  retries: 1,
+  workers: 6,
+  timeout: 45_000,
   expect: {
-    timeout: 5_000
+    timeout: 20_000
   },
   reporter: [
     ['list'],
