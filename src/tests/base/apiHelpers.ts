@@ -1,8 +1,8 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 
-import { API_ROUTES, DEFAULT_USER_PASSWORD } from './constants';
-import { withAuth } from './http';
-import { randomEmail, randomProduct } from '../utils/fakerUtils';
+import { API_ROUTES, DEFAULT_USER_PASSWORD } from './constants.js';
+import { withAuth } from './http.js';
+import { randomEmail, randomProduct } from '../utils/fakerUtils.js';
 
 export async function parseResponseBody<T = Record<string, unknown>>(response: APIResponse): Promise<T> {
   return (await response.json()) as T;

@@ -1,16 +1,22 @@
 # 🧪 Playwright API Testing - ServeRest
 
 [![Playwright](https://img.shields.io/badge/Playwright-TypeScript-2EAD33.svg)](https://playwright.dev/docs/api/class-test)
-[![Node](https://img.shields.io/badge/Node.js-22-43853d.svg)](https://nodejs.org/en)
+[![Node](https://img.shields.io/badge/Node.js-24-43853d.svg)](https://nodejs.org/en)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 
-Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 22** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.
+Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 24** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.
 
 O repositório demonstra como estruturar testes de API 100% em TypeScript, reaproveitando fixtures, utilitários, leitura de dados externos e relatórios avançados com Allure Playwright.
 
 URI do repositório: [https://github.com/reinaldorossetti/playwright-api-typescript-serverest](https://github.com/reinaldorossetti/playwright-api-typescript-serverest)
 URL do Allure Report: [allure-reports](https://reinaldorossetti.github.io/playwright-api-typescript-serverest/allure-reports/#/)
 Documentação complementar sobre os cenários pode ser encontrada dentro de `src/tests/features`.
+
+### Performance dos Testes com Node 24:
+
+Versão utilizada: Node.js v24.11.0.
+Execução: suíte completa Playwright disparada via npm (6 workers).
+Resultado: 50 testes passaram em 7.0 s. A cadência paralela manteve o tempo médio por teste abaixo de 150 ms, com os cenários de carrinho/produtos (1.1⁠–⁠1.5 s cada) dominando o custo total.
 
 ---
 
@@ -20,7 +26,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 - [Sobre a API ServeRest](#-sobre-a-api-serverest)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Pré-requisitos](#-pré-requisitos)
-- [TypeScript - Node.js 22](#-typescript---nodejs-22-no-projeto)
+- [TypeScript - Node.js 24](#-typescript---nodejs-24-no-projeto)
 - [Dependências e Versões](#-dependências-e-versões-packagejson)
 - [Instalação](#-instalação)
 - [Executando os Testes](#-executando-os-testes)
@@ -53,7 +59,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 1. **Stack única**: Playwright test runner cobre API, UI e WebSocket na mesma base.
 2. **DX moderna**: tipagem, ESLint integrado e suporte total ao VS Code.
-3. **Ecossistema Node 22**: aproveita `fetch` nativo, `crypto.randomUUID()`, `structuredClone()` e recursos modernos do runtime.
+3. **Ecossistema Node 24**: aproveita `fetch` nativo, `crypto.randomUUID()`, `structuredClone()` e recursos modernos do runtime.
 4. **Observabilidade**: Allure + traços Playwright facilitam troubleshooting.
 5. **CI/CD direto**: GitHub Actions roda `npx playwright test` sem configuração complexa.
 
@@ -112,7 +118,7 @@ playwright-api-typescript-serverest/
 │       └── utils/
 │           ├── dataUtils.ts             # Leitura de CSV/JSON
 │           └── fakerUtils.ts            # Dados gerados com @faker-js/faker
-├── package.json                         # Scripts e dependências Node 22
+├── package.json                         # Scripts e dependências Node 24
 ├── playwright.config.ts                 # Config global (workers, timeout, reporters)
 ├── tsconfig.json                        # Configuração TypeScript Node16 modules
 ├── .env                                 # Variáveis locais (senha padrão, base URL)
@@ -123,7 +129,7 @@ playwright-api-typescript-serverest/
 
 ## 🔧 Pré-requisitos
 
-- **Node.js 22** (LTS — o projeto aproveita recursos modernos do runtime como `fetch` nativo e `crypto.randomUUID()`)
+- **Node.js 24** (LTS — o projeto aproveita recursos modernos do runtime como `fetch` nativo e `crypto.randomUUID()`)
 - **npm** 10+ (instalado com o Node)
 - **VS Code** com extensões Playwright/TypeScript (opcional, porém recomendado)
 - Acesso à internet para consumir a API ServeRest e instalar dependências
@@ -136,7 +142,7 @@ node -v
 npm -v
 ```
 
-### Exemplo de recursos Node 22
+### Exemplo de recursos Node 24
 
 ```ts
 // fetch nativo — sem dependências extras
@@ -164,13 +170,21 @@ npx playwright install --with-deps
 ```
 ---
 
-## ⚡ TypeScript - Node.js 22 no Projeto
+## ⚡ TypeScript - Node.js 24 no Projeto
 
-Esta seção aborda recursos modernos do **Node.js 22** aproveitados na suíte de testes.
+Esta seção aborda recursos modernos do **Node.js 24** (evolução direta do que passou a existir desde o Node 20) aproveitados na suíte de testes.
+
+### 🚀 Destaques do Node.js 20+ (resumo rápido)
+
+| Versão | Recursos em destaque | Benefícios para testes de API |
+|--------|----------------------|--------------------------------|
+| **Node 20 LTS** | `node:test` runner estável, Permission Model (`--experimental-permission` com `--allow-fs-read`, `--allow-child-process` etc.) e avanços no SEA (Single Executable Apps) | Execução nativa dos testes sem Jest/Mocha, bloqueio de IO/execução inadvertida e opção de empacotar utilitários CLI |
+| **Node 22 LTS** | `WebSocket` global estabilizado via Undici 6, `node --watch` maduro e Permission Model cobrindo `worker_threads` e `child_process` além de `npm@10` | Observabilidade mais rápida, DX melhor em suites grandes e paralelismo mais seguro |
+| **Node 24.x (versão usada aqui)** | Consolida tudo acima com V8 12.x, `fetch`/`WebSocket` nativos totalmente alinhados ao browser, Permission Model granular e toolchain SEA estável | Menor tempo de startup, APIs Web modernas no runtime server-side e binários reproduzíveis para utilitários |
 
 ### 1. `fetch` nativo (sem dependência extra)
 
-Node.js 22 possui o `fetch` estabilizado globalmente — não é necessário incluir `node-fetch`:
+Node.js 24 possui o `fetch` estabilizado globalmente — não é necessário incluir `node-fetch`:
 
 ```ts
 const resp = await fetch('https://serverest.dev/login', {
@@ -213,7 +227,7 @@ O `--watch` é uma flag nativa do Node 18+ que reinicia automaticamente o script
 
 ### 5. `Record<K, V>` - Tipagem de objetos dinâmicos (TypeScript)
 
-`Record<K, V>` é um **utility type do TypeScript** (desde v2.1, 2016) que cria um tipo para objetos com chaves e valores específicos. Funciona perfeitamente com Node.js 22.
+`Record<K, V>` é um **utility type do TypeScript** (desde v2.1, 2016) que cria um tipo para objetos com chaves e valores específicos. Funciona perfeitamente com Node.js 24.
 
 #### 📖 O que é?
 
@@ -322,33 +336,49 @@ Use `Record<K, V>` quando as chaves são **dinâmicas** ou **desconhecidas** em 
 
 ### 🎯 Demonstração Completa
 
-Execute o arquivo [`examples/node22-features.ts`](examples/node22-features.ts) para ver todos esses recursos em ação com exemplos práticos:
+Execute `npm run demo:node24` para rodar o arquivo [`examples/node24-features.cjs`](examples/node24-features.cjs) e acompanhar, na prática, os recursos do Node 20+ que ajudam especificamente em testes de API e medições de performance:
 
 ```bash
-node examples/node22-features.ts
+npm run demo:node24
 ```
 
-Este script demonstra **7 recursos do Node.js 22** aplicados ao contexto de testes de API. O script detecta automaticamente sua versão do Node e usa fallbacks quando necessário para funcionar também no Node 20+.
+O script cobre as seguintes funções nativas:
+
+| # | Função / API | Por que ajuda em testes |
+|---|--------------|------------------------|
+| 1 | `node:test` `mock.fn` | Cria dublês nativos para helpers de API sem Jest/Sinon |
+| 2 | `mock.timers.enable` / `mock.timers.tick` | Avança o relógio sem esperar, ideal para validar retries e backoffs |
+| 3 | `AbortSignal.timeout()` com `fetch` | Impede que testes REST fiquem travados aguardando HTTP |
+| 4 | `performance.timerify` + `PerformanceObserver` | Mede a duração de utilitários e detecta regressões de performance |
+| 5 | `Promise.withResolvers()` + `timers/promises` | Sincroniza fixtures assíncronas sem boilerplate |
+| 6 | `structuredClone` | Duplica fixtures complexas sem risco de mutação compartilhada |
+
+Todos os blocos verificam a versão do runtime e informam fallbacks quando alguém ainda estiver em Node inferior.
 
 **Exemplo de saída:**
 
 ```bash
-🚀 Demonstração de Recursos do Node.js 22
+🚀 Demonstração de Recursos do Node.js 24
 ============================================================
-📌 Node.js versão: 22.0.0
+📌 Node.js versão: 24.11.0
 
-🌐 1. Fetch Nativo (sem dependências externas)
-✅ Usuários encontrados: 21
+🧪 1. node:test mock.fn
+✅ Chamadas registradas: 2 — último payload inspecionado direto do mock
 
-🔐 2. crypto.randomUUID() nativo
-✅ UUID 1: 4a65028b-e979-4bc6-b3f5-a63c0249f230
+⏳ 2. mock.timers.enable
+✅ Callbacks executados sem esperar 3s reais; perfeito para fluxos de retry
 
-📋 3. structuredClone() - cópia profunda sem JSON.parse/stringify
-✅ Original mantido: preco=100, estoque.quantidade=50, tags=2
+�️ 3. AbortSignal.timeout
+✅ Timeout disparado em ~5 ms, evitando testes travados
 
-🔄 4. Métodos imutáveis de Array
-✅ Original: [150,200,100,300,50]
-✅ Ordenado: [50,100,150,200,300]
+� 4. performance.timerify + PerformanceObserver
+✅ Função monitorada executou em ~1 ms, com métricas prontas para alertas
+
+🧵 5. Promise.withResolvers + timers/promises
+✅ “Fixture liberada após async” sem boilerplate de `new Promise`
+
+� 6. structuredClone
+✅ Fixtures clonadas sem `JSON.parse/stringify` e sem mutação compartilhada
 ```
 
 #### 📚 Demonstração de Record<K, V>
@@ -379,7 +409,7 @@ Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteú
 |---------------------------|----------|-----------|
 | `@playwright/test`        | ^1.58.0  | Runner oficial Playwright com APIRequestContext |
 | `typescript`              | ^5.8.2   | Superset tipado de JavaScript |
-| `@types/node`             | ^22.13.14| Tipos do Node 22 |
+| `@types/node`             | ^22.13.14| Tipos oficiais do Node 22 (compatíveis com runtime 24) |
 | `@faker-js/faker`         | ^9.8.0   | Geração de dados randômicos |
 | `allure-playwright`       | ^3.4.1   | Integração Playwright → Allure results |
 | `allure-commandline`      | ^2.34.1  | CLI para gerar/abrir HTML do Allure |
@@ -465,7 +495,7 @@ npx playwright test --workers=auto
 ### 🧱 Passos principais
 
 1. Checkout
-2. Setup Node.js 22 com cache npm
+2. Setup Node.js 24 com cache npm
 3. `npm ci`
 4. `npx playwright install --with-deps`
 5. `npx playwright test`

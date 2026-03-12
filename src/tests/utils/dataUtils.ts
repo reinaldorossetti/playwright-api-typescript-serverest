@@ -5,10 +5,15 @@ export function resourcePath(...parts: string[]): string {
   return path.join(process.cwd(), 'src', 'tests', 'resources', ...parts);
 }
 
+const jsonCache = new Map<string, unknown>();
+
 export function loadJsonResource<T = Record<string, unknown>>(...parts: string[]): T {
   const filePath = resourcePath(...parts);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(content) as T;
+  if (!jsonCache.has(filePath)) {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    jsonCache.set(filePath, JSON.parse(content));
+  }
+  return jsonCache.get(filePath) as T;
 }
 
 export function readCsvLines(...parts: string[]): string[] {

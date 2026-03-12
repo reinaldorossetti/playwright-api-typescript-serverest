@@ -1,5 +1,6 @@
 import { test, expect } from '../../base/api.fixture';
-import { Severity, severity, tag } from 'allure-js-commons';
+import { Severity } from 'allure-js-commons';
+import { setSeverityAndTags } from '../../base/allureUtils.js';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
@@ -8,12 +9,7 @@ import { randomEmail, randomName } from '../../utils/fakerUtils';
 
 test.describe.configure({ mode: 'parallel' });
 
-const setSeverityAndTags = async (sev: Severity, tags: string[] = []): Promise<void> => {
-  await severity(sev);
-  for (const t of tags) {
-    await tag(t);
-  }
-};
+
 
 type User = {
   _id: string;
