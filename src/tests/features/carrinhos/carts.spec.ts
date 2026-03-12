@@ -1,7 +1,6 @@
 import { test, expect } from '../../base/api.fixture';
 import type { APIRequestContext } from '@playwright/test';
-import { allure } from 'allure-playwright';
-import { Severity } from 'allure-js-commons';
+import { Severity, severity, tag } from 'allure-js-commons';
 import { API_ROUTES, DEFAULT_USER_PASSWORD } from '../../base/constants';
 import { withAuth } from '../../base/http';
 import { createProduct, createUser, loginAndGetToken, parseResponseBody } from '../../base/apiHelpers';
@@ -9,10 +8,10 @@ import { randomEmail } from '../../utils/fakerUtils';
 
 test.describe.configure({ mode: 'parallel' });
 
-const setSeverityAndTags = async (severity: Severity, tags: string[] = []): Promise<void> => {
-  await allure.severity(severity);
-  for (const tag of tags) {
-    await allure.tag(tag);
+const setSeverityAndTags = async (sev: Severity, tags: string[] = []): Promise<void> => {
+  await severity(sev);
+  for (const t of tags) {
+    await tag(t);
   }
 };
 

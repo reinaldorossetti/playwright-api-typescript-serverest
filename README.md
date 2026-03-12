@@ -1,15 +1,15 @@
 # 🧪 Playwright API Testing - ServeRest
 
 [![Playwright](https://img.shields.io/badge/Playwright-TypeScript-2EAD33.svg)](https://playwright.dev/docs/api/class-test)
-[![Node](https://img.shields.io/badge/Node.js-20%2B-43853d.svg)](https://nodejs.org/en)
+[![Node](https://img.shields.io/badge/Node.js-22-43853d.svg)](https://nodejs.org/en)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 
-Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 20+** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.
+Projeto de automação de testes de API utilizando **Microsoft Playwright com TypeScript** e **Node.js 22** para testar a API REST **ServeRest** – uma API gratuita que simula uma loja virtual.
 
 O repositório demonstra como estruturar testes de API 100% em TypeScript, reaproveitando fixtures, utilitários, leitura de dados externos e relatórios avançados com Allure Playwright.
 
 URI do repositório: [https://github.com/reinaldorossetti/playwright-api-typescript-serverest](https://github.com/reinaldorossetti/playwright-api-typescript-serverest)
-
+URL do Allure Report: [allure-reports](https://reinaldorossetti.github.io/playwright-api-typescript-serverest/allure-reports/#/)
 Documentação complementar sobre os cenários pode ser encontrada dentro de `src/tests/features`.
 
 ---
@@ -53,7 +53,7 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 1. **Stack única**: Playwright test runner cobre API, UI e WebSocket na mesma base.
 2. **DX moderna**: tipagem, ESLint integrado e suporte total ao VS Code.
-3. **Ecosistema Node 20+**: aproveita `fetch`, `crypto` e recursos atuais do runtime.
+3. **Ecosistema Node 22**: aproveita `fetch` nativo, `crypto.randomUUID()`, `structuredClone()` e recursos modernos do runtime.
 4. **Observabilidade**: Allure + traços Playwright facilitam troubleshooting.
 5. **CI/CD direto**: GitHub Actions roda `npx playwright test` sem configuração complexa.
 
@@ -112,7 +112,7 @@ playwright-api-typescript-serverest/
 │       └── utils/
 │           ├── dataUtils.ts             # Leitura de CSV/JSON
 │           └── fakerUtils.ts            # Dados gerados com @faker-js/faker
-├── package.json                         # Scripts e dependências Node 20+
+├── package.json                         # Scripts e dependências Node 22
 ├── playwright.config.ts                 # Config global (workers, timeout, reporters)
 ├── tsconfig.json                        # Configuração TypeScript Node16 modules
 ├── .env                                 # Variáveis locais (senha padrão, base URL)
@@ -123,7 +123,7 @@ playwright-api-typescript-serverest/
 
 ## 🔧 Pré-requisitos
 
-- **Node.js 20+** (o projeto utiliza recursos do runtime atual)
+- **Node.js 22** (LTS — o projeto aproveita recursos modernos do runtime como `fetch` nativo e `crypto.randomUUID()`)
 - **npm** 10+ (instalado com o Node)
 - **VS Code** com extensões Playwright/TypeScript (opcional, porém recomendado)
 - Acesso à internet para consumir a API ServeRest e instalar dependências
@@ -136,6 +136,26 @@ node -v
 npm -v
 ```
 
+### Exemplo de recursos Node 22
+
+```ts
+// fetch nativo — sem dependências extras
+const resp = await fetch('https://serverest.dev/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'fulano@qa.com', password: 'senha@123' })
+});
+const { authorization } = await resp.json();
+
+// crypto.randomUUID — identificador único nativo
+const email = `user-${crypto.randomUUID()}@test.com`;
+
+// structuredClone — cópia profunda sem JSON.parse/stringify
+const base = { preco: 100, quantidade: 5 };
+const copia = structuredClone(base);
+copia.preco = 200; // não altera `base`
+```
+
 ### Pré-instalação Playwright
 
 ```bash
@@ -144,55 +164,222 @@ npx playwright install --with-deps
 ```
 ---
 
-## 🐍 Python no Projeto
+## TypeScript - Node.js 22 no Projeto
 
-Apesar do título da seção, o repositório foi migrado inteiramente para **TypeScript**. Aqui registramos o paralelo de como os conceitos Python foram traduzidos:
+Esta seção aborda recursos modernos do **Node.js 22** aproveitados na suíte de testes.
 
-1. **Payloads JSON** agora são objetos tipados em TypeScript:
+### 1. `fetch` nativo (sem dependência extra)
+
+Node.js 22 possui o `fetch` estabilizado globalmente — não é necessário incluir `node-fetch`:
 
 ```ts
-const payload = {
-    nome: `Product ${Date.now()}`,
-    preco: 250,
-    descricao: 'Produto de teste',
-    quantidade: 10
+const resp = await fetch('https://serverest.dev/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'fulano@qa.com', password: 'senha@123' })
+});
+const body = await resp.json();
+console.log(body.authorization);
+```
+
+### 2. `crypto.randomUUID()` nativo
+
+Geração de identificadores únicos sem importações externas:
+
+```ts
+const uniqueEmail = `user-${crypto.randomUUID()}@test.com`;
+```
+
+### 3. `structuredClone()` para cópia profunda
+
+Clone profundo de objetos sem `JSON.parse/JSON.stringify`:
+
+```ts
+const payloadBase = { preco: 100, quantidade: 5 };
+const payload = structuredClone(payloadBase);
+payload.preco = 200; // não afeta payloadBase
+```
+
+### 4. Modo `--watch` para desenvolvimento
+
+```bash
+node --watch src/myScript.ts
+
+# Vigiar e executar testes quando houver mudanças (Node 18+)
+node --watch --test src/tests/**/*.spec.ts
+```
+
+O `--watch` é uma flag nativa do Node 18+ que reinicia automaticamente o script quando detecta mudanças nos arquivos, eliminando a necessidade de ferramentas como `nodemon`.
+
+### 5. `Record<K, V>` - Tipagem de objetos dinâmicos (TypeScript)
+
+`Record<K, V>` é um **utility type do TypeScript** (desde v2.1, 2016) que cria um tipo para objetos com chaves e valores específicos. Funciona perfeitamente com Node.js 22.
+
+#### 📖 O que é?
+
+`Record<K, V>` significa: "um objeto onde todas as chaves são do tipo `K` e todos os valores são do tipo `V`".
+
+```ts
+// Sintaxe básica
+type MeuObjeto = Record<string, number>;
+
+// Equivale a:
+type MeuObjeto = {
+  [chave: string]: number;
 };
 ```
 
-2. **Fixtures do Pytest** foram substituídas por `test.extend` no `api.fixture.ts`:
+#### 🎯 Exemplos práticos em testes de API
+
+**1. Headers HTTP dinâmicos:**
 
 ```ts
-export const test = base.extend<ApiFixtures>({
-    api: async ({ playwright }, use) => {
-        const api = await playwright.request.newContext({
-            baseURL: BASE_URL,
-            extraHTTPHeaders: { 'Content-Type': 'application/json' }
-        });
-        await use(api);
-        await api.dispose();
-    }
+const headers: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer abc123',
+  'X-Custom-Header': 'valor'
+};
+
+await api.post('/login', { headers });
+```
+
+**2. Validação de erros da API:**
+
+```ts
+// API retorna: { "email": "deve ser um email válido", "password": "é obrigatório" }
+const body = await response.json() as Record<string, string>;
+
+expect(body.email).toBe('deve ser um email válido');
+expect(body.password).toBe('é obrigatório');
+```
+
+**3. Parâmetros de query string:**
+
+```ts
+const queryParams: Record<string, string> = {
+  nome: 'Mouse',
+  preco: '100',
+  _limit: '10'
+};
+
+// Gera: /produtos?nome=Mouse&preco=100&_limit=10
+const url = `/produtos?${new URLSearchParams(queryParams)}`;
+```
+
+**4. Mapeamento de status codes:**
+
+```ts
+const statusMessages: Record<number, string> = {
+  200: 'Sucesso',
+  201: 'Criado',
+  400: 'Requisição inválida',
+  401: 'Não autorizado',
+  404: 'Não encontrado'
+};
+
+console.log(statusMessages[response.status()]); // "Sucesso"
+```
+
+**5. Exemplo real do projeto** (`login.spec.ts`):
+
+```ts
+test('CT05 - Validate invalid email format', async ({ api }) => {
+  const resp = await api.post(API_ROUTES.LOGIN, {
+    data: { email: 'emailinvalido', password: 'senha123' }
+  });
+
+  expect(resp.status()).toBe(400);
+  
+  // A API retorna um objeto com erros de validação
+  const body = await parseResponseBody<Record<string, string>>(resp);
+  expect(body.email).toBeTruthy(); // Verifica que há erro no campo email
 });
 ```
 
-3. **Type Hints** viraram interfaces/`type` e generics em helpers como `parseResponseBody<T>()`.
+#### 💡 Por que usar?
 
-### 💡 Boas práticas herdadas
+✅ **Tipagem segura**: TypeScript garante que todas as chaves e valores seguem o contrato  
+✅ **Flexibilidade**: Aceita qualquer quantidade de chaves  
+✅ **Autocomplete**: IDEs sugerem os tipos corretos  
+✅ **Refatoração segura**: Mudanças no tipo são detectadas em compile-time
+
+#### ⚠️ Alternativas quando você conhece as chaves
+
+Se você sabe exatamente quais chaves existem, prefira interfaces:
+
+```ts
+// ❌ Muito genérico
+type LoginResponse = Record<string, string>;
+
+// ✅ Melhor - contrato explícito
+interface LoginResponse {
+  authorization: string;
+  message: string;
+}
+```
+
+Use `Record<K, V>` quando as chaves são **dinâmicas** ou **desconhecidas** em tempo de desenvolvimento.
+
+### 🎯 Demonstração Completa
+
+Execute o arquivo [`examples/node22-features.ts`](examples/node22-features.ts) para ver todos esses recursos em ação com exemplos práticos:
+
+```bash
+node examples/node22-features.ts
+```
+
+Este script demonstra **7 recursos do Node.js 22** aplicados ao contexto de testes de API. O script detecta automaticamente sua versão do Node e usa fallbacks quando necessário para funcionar também no Node 20+.
+
+**Exemplo de saída:**
+
+```bash
+🚀 Demonstração de Recursos do Node.js 22
+============================================================
+📌 Node.js versão: 22.0.0
+
+🌐 1. Fetch Nativo (sem dependências externas)
+✅ Usuários encontrados: 21
+
+🔐 2. crypto.randomUUID() nativo
+✅ UUID 1: 4a65028b-e979-4bc6-b3f5-a63c0249f230
+
+📋 3. structuredClone() - cópia profunda sem JSON.parse/stringify
+✅ Original mantido: preco=100, estoque.quantidade=50, tags=2
+
+🔄 4. Métodos imutáveis de Array
+✅ Original: [150,200,100,300,50]
+✅ Ordenado: [50,100,150,200,300]
+```
+
+#### 📚 Demonstração de Record<K, V>
+
+Para ver exemplos práticos de `Record<string, string>` em contexto de testes de API, execute:
+
+```bash
+npm run demo:record
+# ou
+node examples/record-type-usage.ts
+```
+
+Este script demonstra **8 casos de uso** do `Record<K, V>`: headers HTTP, validação de erros, query parameters, mapeamento de status codes, configurações, cache de tokens, comparação com interfaces e uso avançado com union types.
+
+### 💡 Boas práticas
 
 - Centralize contexto em fixtures compartilhadas.
 - Descreva contratos de resposta usando generics para evitar casts perigosos.
-- Prefira `await expect(response).toHaveStatus(…)` ou assertions personalizadas dentro dos helpers para manter a sintaxe fluida.
+- Prefira `await expect(response).toHaveStatus(…)` dentro dos helpers para manter a sintaxe fluida.
 
 ---
 
 ## 📦 Dependências e Versões (requirements.txt)
 
-Este projeto utiliza `npm` em vez de `requirements.txt`. A tabela abaixo reflete o conteúdo do `package.json`:
+Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteúdo do `package.json`:
 
 | Pacote                    | Versão   | Descrição |
 |---------------------------|----------|-----------|
 | `@playwright/test`        | ^1.58.0  | Runner oficial Playwright com APIRequestContext |
 | `typescript`              | ^5.8.2   | Superset tipado de JavaScript |
-| `@types/node`             | ^22.13.14| Tipos do Node 20 |
+| `@types/node`             | ^22.13.14| Tipos do Node 22 |
 | `@faker-js/faker`         | ^9.8.0   | Geração de dados randômicos |
 | `allure-playwright`       | ^3.4.1   | Integração Playwright → Allure results |
 | `allure-commandline`      | ^2.34.1  | CLI para gerar/abrir HTML do Allure |
@@ -265,7 +452,6 @@ O `playwright.config.ts` está com `workers: 6`. Para sobrescrever durante a exe
 npx playwright test --workers=auto
 ```
 
----
 
 ## ⚙️ Esteira CI/CD - GitHub Actions
 
@@ -489,7 +675,7 @@ Os snapshots ficam em `src/tests/__snapshots__` e podem ser atualizados com `npx
 
 ## 🔐 Variáveis de Ambiente — python-dotenv
 
-Seguimos o mesmo conceito desta seção, porém agora usamos [`dotenv`](https://github.com/motdotla/dotenv) no ecossistema Node para popular valores sensíveis como senhas padrão e URLs.
+Utilizamos [`dotenv`](https://github.com/motdotla/dotenv) para carregar valores sensíveis como senhas padrão e URLs a partir de um arquivo `.env`, mantendo credenciais fora do código-fonte.
 
 ### Arquivo `.env`
 
@@ -536,7 +722,7 @@ Prefira, contudo, manter o `.env` atualizado para garantir o mesmo comportamento
 
 ## 🎯 Funcionalidades e Sintaxe Nativas (Playwright Python API)
 
-Mantendo o título original, mas descrevendo como aplicamos os mesmos conceitos no runner TypeScript:
+Recursos e padrões nativos utilizados nos testes com Playwright TypeScript:
 
 ### 1. Inicialização de um contexto isolado
 
