@@ -14,9 +14,9 @@ Documentação complementar sobre os cenários pode ser encontrada dentro de `sr
 
 ### Performance dos Testes com Node 24:
 
-Versão utilizada: Node.js v24.11.0.
-Execução: suíte completa Playwright disparada via npm (6 workers).
-Resultado: 50 testes passaram em 7.0 s. A cadência paralela manteve o tempo médio por teste abaixo de 150 ms, com os cenários de carrinho/produtos (1.1⁠–⁠1.5 s cada) dominando o custo total.
+**Versão utilizada:** Node.js v24.11.0.
+**Execução:** suíte completa Playwright disparada via npm (6 workers).
+**Resultado:** 50 testes passaram em 7.1 s. Os testes em paralelo mantiveram o tempo médio por teste abaixo de 150 ms, com os cenários de carrinho/produtos (1.1 a ⁠1.5s cada) dominando o custo total.
 
 ---
 
@@ -105,6 +105,7 @@ playwright-api-typescript-serverest/
 │       ├── base/
 │       │   ├── api.fixture.ts           # Fixture compartilhada com APIRequestContext
 │       │   ├── apiHelpers.ts            # Helpers (login, produtos, usuários)
+│       │   ├── allureUtils.ts           # Helper compartilhado setSeverityAndTags
 │       │   ├── constants.ts             # Rotas + senhas provenientes do .env
 │       │   ├── env.ts                   # Carregamento e validação de variáveis de ambiente
 │       │   └── http.ts                  # Helpers para headers/autenticação
@@ -116,11 +117,11 @@ playwright-api-typescript-serverest/
 │       ├── resources/
 │       │   └── playwright_serverest/... # CSV/JSON usados nos testes
 │       └── utils/
-│           ├── dataUtils.ts             # Leitura de CSV/JSON
+│           ├── dataUtils.ts             # Leitura de CSV/JSON (com cache em memória)
 │           └── fakerUtils.ts            # Dados gerados com @faker-js/faker
 ├── package.json                         # Scripts e dependências Node 24
 ├── playwright.config.ts                 # Config global (workers, timeout, reporters)
-├── tsconfig.json                        # Configuração TypeScript Node16 modules
+├── tsconfig.json                        # Configuração TypeScript NodeNext modules
 ├── .env                                 # Variáveis locais (senha padrão, base URL)
 └── README.md
 ```
@@ -336,10 +337,10 @@ Use `Record<K, V>` quando as chaves são **dinâmicas** ou **desconhecidas** em 
 
 ### 🎯 Demonstração Completa
 
-Execute `npm run demo:node24` para rodar o arquivo [`examples/node24-features.cjs`](examples/node24-features.cjs) e acompanhar, na prática, os recursos do Node 20+ que ajudam especificamente em testes de API e medições de performance:
+Execute `npm run demo:node22` para rodar o arquivo [`examples/node24-features.cjs`](examples/node24-features.cjs) e acompanhar, na prática, os recursos do Node 20+ que ajudam especificamente em testes de API e medições de performance:
 
 ```bash
-npm run demo:node24
+npm run demo:node22
 ```
 
 O script cobre as seguintes funções nativas:
@@ -412,6 +413,7 @@ Este projeto gerencia dependências com `npm`. A tabela abaixo reflete o conteú
 | `@types/node`             | ^22.13.14| Tipos oficiais do Node 22 (compatíveis com runtime 24) |
 | `@faker-js/faker`         | ^9.8.0   | Geração de dados randômicos |
 | `allure-playwright`       | ^3.4.1   | Integração Playwright → Allure results |
+| `allure-js-commons`       | ^3.4.1   | Enums e funções Allure (`Severity`, `severity`, `tag`) |
 | `allure-commandline`      | ^2.34.1  | CLI para gerar/abrir HTML do Allure |
 | `dotenv`                  | ^17.3.1  | Carregamento de variáveis do `.env` |
 
@@ -536,13 +538,11 @@ export { expect };
 ### Exemplo 2: Login com sucesso (`src/tests/features/login/login.spec.ts`)
 
 ```ts
-import { allure } from 'allure-playwright';
 import { Severity } from 'allure-js-commons';
+import { setSeverityAndTags } from '../../base/allureUtils.js';
 
 test('CT01 - Perform login with valid credentials and validate token', async ({ api }) => {
-    await allure.severity(Severity.CRITICAL);
-    await allure.tag('api');
-    await allure.tag('login');
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'login', 'happy-path']);
 
     const email = randomEmail();
     const password = DEFAULT_USER_PASSWORD;
@@ -615,27 +615,27 @@ export function readCsvLines(...parts: string[]): string[] {
 ### Exemplo 7: Ciclo completo de carrinho (`src/tests/features/carrinhos/carts.spec.ts`)
 
 ```ts
-import { allure } from 'allure-playwright';
 import { Severity } from 'allure-js-commons';
+import { setSeverityAndTags } from '../../base/allureUtils.js';
 
-test('CT01 - Full cart lifecycle for authenticated admin', async ({ api }) => {
-    await allure.severity(Severity.CRITICAL);
-    await allure.tag('api');
-    await allure.tag('carts');
+test('CT01 - Full cart lifecycle for authenticated user', async ({ api }) => {
+    await setSeverityAndTags(Severity.CRITICAL, ['api', 'carrinhos', 'lifecycle']);
 
-    const { token } = await createAdminAndLogin(api);
-    await ensureCartIsClean(api, token);
+    const token = await createAdminUserAndGetToken(api);
+    await api.delete(API_ROUTES.CART_CANCEL, { headers: withAuth(token) });
 
     const productId = await createProduct(api, token, {
-        nome: `Produto ${Date.now()}`,
-        preco: 150,
-        descricao: 'Produto de teste',
-        quantidade: 10
+        price: 150,
+        quantity: 10,
+        description: 'Product created for cart lifecycle test'
     });
 
-    const cartResp = await createCart(api, token, { produtos: [{ idProduto: productId, quantidade: 2 }] });
-    expect(cartResp.status()).toBe(201);
-    const cart = await parseResponseBody<{ _id: string }>(cartResp);
+    const createCartResp = await api.post(API_ROUTES.CARTS, {
+        headers: withAuth(token),
+        data: { produtos: [{ idProduto: productId, quantidade: 2 }] }
+    });
+    expect(createCartResp.status()).toBe(201);
+    const cart = await parseResponseBody<{ _id: string; message: string }>(createCartResp);
 
     const getResp = await api.get(`${API_ROUTES.CARTS}/${cart._id}`);
     expect(getResp.status()).toBe(200);
@@ -643,8 +643,8 @@ test('CT01 - Full cart lifecycle for authenticated admin', async ({ api }) => {
     expect(body.produtos).toHaveLength(1);
     expect(body.precoTotal).toBeGreaterThan(0);
 
-    const finishResp = await api.delete(API_ROUTES.CARTS_FINISH, { headers: withAuth(token) });
-    expect(finishResp.status()).toBe(200);
+    const concludeResp = await api.delete(API_ROUTES.CART_CONCLUDE, { headers: withAuth(token) });
+    expect(concludeResp.status()).toBe(200);
 });
 ```
 
@@ -829,18 +829,38 @@ No CI, os diretórios `allure-results` e `allure-report` são carregados como ar
 
 ### 🏷️ Allure Report — Decorators
 
-Utilizamos diretamente o `allure` exportado por `allure-playwright`, aliado às enums de `allure-js-commons`, para definir criticidade e metadados sem helpers adicionais.
+Utilizamos o helper compartilhado `setSeverityAndTags` (em `src/tests/base/allureUtils.ts`) para definir criticidade e tags de forma consistente em todos os specs, sem duplicação.
 
-#### Chamadas úteis
+#### Helper compartilhado
 
-| Chamada | Descrição |
-|---------|-----------|
-| `await allure.severity(Severity.CRITICAL)` | Define criticidade do caso |
-| `await allure.tag('api')` | Adiciona tags |
-| `await allure.epic('Autenticação')` | Registra épicos/histórias |
-| `await allure.story('Login inválido')` | Story específica |
-| `await allure.link('https://serverest.dev', 'ServeRest')` | Adiciona links |
-| `await allure.owner('squad-api')` | Define responsável |
+```ts
+// src/tests/base/allureUtils.ts
+import { Severity, severity, tag } from 'allure-js-commons';
+
+export const setSeverityAndTags = async (sev: Severity, tags: string[] = []): Promise<void> => {
+  await severity(sev);
+  for (const t of tags) { await tag(t); }
+};
+```
+
+#### Uso nos specs
+
+```ts
+import { Severity } from 'allure-js-commons';
+import { setSeverityAndTags } from '../../base/allureUtils.js';
+
+test('CT02 - Login inválido retorna 401', async ({ api }) => {
+    await setSeverityAndTags(Severity.NORMAL, ['api', 'login', 'negative']);
+
+    const response = await api.post(API_ROUTES.LOGIN, {
+        data: { email: 'usuario@inexistente.com', password: 'senhaerrada' }
+    });
+
+    expect(response.status()).toBe(401);
+    const body = await parseResponseBody<{ message: string }>(response);
+    expect(body.message).toBe('Email e/ou senha inválidos');
+});
+```
 
 #### Severidades disponíveis
 
@@ -851,30 +871,6 @@ Utilizamos diretamente o `allure` exportado por `allure-playwright`, aliado às 
 | `Severity.NORMAL` | Casos médios |
 | `Severity.MINOR` | Impacto baixo |
 | `Severity.TRIVIAL` | Edge cases |
-
-#### Exemplo completo (TypeScript)
-
-```ts
-import { allure } from 'allure-playwright';
-import { Severity } from 'allure-js-commons';
-
-test('CT02 - Login inválido retorna 401', async ({ api }) => {
-    await allure.severity(Severity.CRITICAL);
-    await allure.epic('Autenticação');
-    await allure.feature('Login');
-    await allure.story('Negativa - credenciais inválidas');
-    await allure.tag('api');
-    await allure.tag('negative');
-
-    const response = await api.post(API_ROUTES.LOGIN, {
-        data: { email: 'usuario@inexistente.com', password: 'senhaerrada' }
-    });
-
-    await expect(response).toHaveStatus(401);
-    const body = await parseResponseBody<{ message: string }>(response);
-    expect(body.message).toBe('Email e/ou senha inválidos');
-});
-```
 
 ---
 
